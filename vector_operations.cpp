@@ -19,6 +19,8 @@ using namespace std;
 
 	The value returned is the index of the quadrant within the graph 3-D vector.
 */
+
+//* helper function *Test for bugs/errors
 int particle_quadrant_helper(const pair<int,int>& particle) {
 
 /*
@@ -125,6 +127,7 @@ void point_translation(vector<vector<T>>& quadrant, pair<int, int> point, int q,
 
 // Function to determine the bounds of the particle 
 
+//* helper function *Test for bugs/errors
 template<typename T>
 void graph_bound_print(const graph<T>& cartesian, const pair<int,int>& particle){
 /*
@@ -166,17 +169,56 @@ void graph_bound_print(const graph<T>& cartesian, const pair<int,int>& particle)
 	}
 }
 
+//* helper function *Test for bugs/errors
+template<typename T>
+bool particle_within_bounds(const graph<T>& cartesian, const pair<int,int>& particle, bool BOUND_MESSAGE) {
 
-//* helper function
-bool particle_within_bounds() {
+	bool x_bound, y_bound;
 
-	/*
-		if (particle.first >= 0 && particle.second >= 0) return 1;
-		else if (particle.first < 0 && particle.second >= 0) return 0;
-		else if (particle.first <= 0 && particle.second < 0) return 2;
-		else if (particle.first > 0 && particle.second < 0) return 3;
-	*/
+	//Determining the quadrant for print operations.
+	int q; 
+	int quadrant = particle_quadrant_helper(particle);
+	int quadrant_bound = cartesian[0].size() - 1;
 
+	//QuadI
+	if (quadrant == 1) {
+		
+		x_bound = (particle.first >= 0 && particle.first <= quadrant_bound);
+		y_bound = (particle.second >= 0 && particle.second <= quadrant_bound);
+
+		q = 1;
+	}
+	//QuadII
+	else if (quadrant == 0) {
+
+		x_bound = (particle.first >= -1 * quadrant_bound && particle.first <= 0);
+		y_bound = (particle.second >= 0 && particle.second <= quadrant_bound);
+
+		q = 2;
+	}
+	//QuadIII
+	else if (quadrant == 2) {
+		
+		x_bound = (particle.first >= -1 * quadrant_bound && particle.first <= 0);
+		y_bound = (particle.second >= -1 * quadrant_bound && particle.second <= 0);
+
+		q = 3; 
+	}
+	//QuadIV
+	else if (quadrant == 3) {
+		
+		x_bound = (particle.first >= 0 && particle.first <= quadrant_bound);
+		y_bound = (particle.second >= -1 * quadrant_bound && particle.second <= 0);
+	}
+
+	if (x_bound && y_bound) return true;
+	else {
+		if (BOUND_MESSAGE) {
+			cout << "The point: \t(" << particle.first << "," << particle.second << ") is out of bounds within quadrant: " << q << "\n"; 
+			graph_bound_print(cartesian, particle);
+		}
+		return false;
+	}
 }
 
 
@@ -201,7 +243,20 @@ graph<T> graph_generate(int planar_bound, T native_projector) {
 		the particle; it's position, and representing value
 */
 
+template<typename T> 
+void particle_graph_translator(graph<T>& cartesian, const pair<pair<int, int>, T>& particle, bool BOUND_MESSAGE) {
 
+	pair<int, int> coordinates		= particle.first;
+
+	T value							= particle.second; 
+
+	int quadrant					= particle_quadrant_helper(coordinates); 
+
+	if (particle_within_bounds(cartesian, coordinates, BOUND_MESSAGE)) {
+		cartesian[quadrant][coordinates.first][coordinates.second] = value;
+	}
+
+}
 
 template<typename T>
 void graph_print(const graph<T>& cartesian) {
@@ -250,18 +305,17 @@ int main() {
 
 	//graph_print(cartesian); 
 
+	
+	//Create a function to automate points. 
 	particle_int<char> point_1 = { {0,0},'A' };
 	particle_int<char> point_2 = { {1,-1}, 'B' };
 	particle_int<char> point_3 = { {-1,0}, 'C' };
 	particle_int<char> point_4 = { {-1,-1}, 'D' }; 
- 
-	cout << particle_quadrant_helper(point_1.first) << "\n";
-	cout << particle_quadrant_helper(point_2.first) << "\n";
-	cout << particle_quadrant_helper(point_3.first) << "\n";
-	cout << particle_quadrant_helper(point_4.first) << "\n";
 
-	
 
+	particle_graph_translator(cartesian, point_2, true); 
+
+	graph_print(cartesian); 
 
 
 	return 0;
