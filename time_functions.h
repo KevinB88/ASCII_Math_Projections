@@ -18,7 +18,7 @@ void timer_millis(int time, bool MESSAGE) {
 	if (MESSAGE) cout << "Timer ended.\n"; 
 }
 
-void time_seconds(int time, bool MESSAGE) {
+void timer_seconds(int time, bool MESSAGE) {
 
 	if (MESSAGE) cout << "Timer started for: " << time << " seconds.\n";
 

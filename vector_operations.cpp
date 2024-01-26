@@ -289,6 +289,7 @@ void particle_graph_translator(graph<T>& cartesian, const pair<pair<int, int>, T
 	}
 }
 
+
 template<typename T>
 void graph_print(const graph<T>& cartesian) {
 
@@ -329,10 +330,50 @@ void graph_print(const graph<T>& cartesian) {
 }
 
 
-int main() {
-	
-	graph<char> cartesian = graph_generate(25, '*');
+template<typename T>
+void graph_print_version_II(const graph<T>& cartesian) {
+	using namespace std;
 
+	int planar_height = cartesian[0].size() + cartesian[1].size();
+	int planar_width = cartesian[0][0].size() + cartesian[2][0].size();
+
+	while (true) {  // Infinite loop for continuous update, you might want to adjust this
+		// Clear the screen
+#ifdef _WIN32
+		system("cls");
+#else
+		system("clear");
+#endif
+
+		for (int X = 0; X < planar_height; X++) {
+			for (int Y = 0; Y < planar_width; Y++) {
+
+				if (X < cartesian[0].size() && Y < cartesian[0][0].size()) {
+					cout << cartesian[0][X][Y] << " ";
+				}
+				else if (X < cartesian[0].size() && Y >= cartesian[0][0].size()) {
+					cout << cartesian[1][X][Y % cartesian[1][0].size()] << " ";
+				}
+				else if (X >= cartesian[0].size() && Y < cartesian[0][0].size()) {
+					cout << cartesian[2][X % cartesian[2].size()][Y] << " ";
+				}
+				else if (X >= cartesian[0].size() && Y >= cartesian[0][0].size()) {
+					cout << cartesian[3][X % cartesian[3].size()][Y % cartesian[3][0].size()] << " ";
+				}
+			}
+			cout << "\n";
+		}
+
+		// Sleep for a short duration before updating again
+		this_thread::sleep_for(chrono::milliseconds(100)); // Adjust the duration as needed
+	}
+}
+
+
+
+
+
+int main() {
 	
 			/*Create a function to automate points. 
 				particle_int<char> point_1 = { {0,0},'A' };
@@ -345,18 +386,59 @@ int main() {
 
 				graph_print(cartesian); */
 
+	//* MAIN FRAME
+			int pointA					= 0;
+			int pointB					= 180;
+			double magnitude			= sqrt(2); 
+			char particle_symbol		= '*'; 
+			char native_symbol			= ' '; 
+			int quadrant_bound			= 25; 
+			bool toggle_timer_message	= false;
+			bool toggle_messages		= true; 
+			int time_scale				= 10; 
+	//* MAIN FRAME
 
-	int pointA = 0;
-	int pointB = 180; 
 
-	double magnitude = sqrt(2); 
+			//Generate a cartesian plane of 4-quadrants. 
+			graph<char> cartesian = graph_generate(quadrant_bound, native_symbol);
+
+			
+			if (toggle_messages) {
+				std::cout << "Starting timer..\n";
+				timer_seconds(2, false); 
+			}
+			auto start_time = chrono::high_resolution_clock::now(); 
+
+
+			if (toggle_messages) {
+				std::cout << "Generating shape..\n";
+				timer_seconds(2, false); 
+			}
 
 	while (true) {
 
+/*	
 		double x_position = magnitude * cos(radians_conversion(pointA));
-		double y_position = magnitude * sin(radians_conversion(pointB)); 
+		double y_position = magnitude * sin(radians_conversion(pointA)); 
 
 		print_double_coordinates({ x_position,y_position }); 
+*/
+
+		//Testing the translation onto an integer plane 
+				double x_position = magnitude * cos(radians_conversion(pointA));
+				double y_position = magnitude * sin(radians_conversion(pointA));
+
+				int x_transl = x_position * 10;
+				int y_transl = y_position * 10;
+
+					pair<int, int> coordiantes = { x_transl, y_transl };
+					pair<pair<int, int>, char> particle = { coordiantes, particle_symbol }; 
+
+					print_int_coordinates(coordiantes); 
+
+					particle_graph_translator(cartesian, particle, true);
+
+					//graph_print(cartesian); 
 
 		pointA %= 360;
 		pointB %= 360;
@@ -364,8 +446,24 @@ int main() {
 		pointA++;
 		pointB++; 
 
-		timer_millis(50,false); 
+		timer_millis(time_scale, toggle_timer_message); 
+
+		if (pointA == 360) break;
 	}
+			auto end_time = chrono::high_resolution_clock::now(); 
+
+			auto time_elapsed = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); 
+
+		
+			if (toggle_messages) {
+
+				std::cout << "Time elapsed: " << time_elapsed.count() << " milliseconds\n";
+				timer_seconds(2, false); 
+				std::cout << "Printing shape..\n"; 
+				timer_seconds(1, false);
+			}
+
+			graph_print(cartesian);
 
 	return 0;
 }
