@@ -49,12 +49,9 @@ int main() {
 
 		//print_pair(point, true);
 
-		
-		
+	
 		
 		//print_pair(point_integer, true); 
-
-
 
 
 		X += 0.01;

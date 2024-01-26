@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include "typedefs.h"
+#include "time_functions.h"
+#include "math_constants.h"
 
 /*
 	Graphs are always defined to have the following matrices
@@ -173,12 +176,13 @@ void graph_bound_print(const graph<T>& cartesian, const pair<int,int>& particle)
 template<typename T>
 bool particle_within_bounds(const graph<T>& cartesian, const pair<int,int>& particle, bool BOUND_MESSAGE) {
 
-	bool x_bound, y_bound;
+	bool x_bound				= false; 
+	bool y_bound				= false;
 
 	//Determining the quadrant for print operations.
-	int q; 
-	int quadrant = particle_quadrant_helper(particle);
-	int quadrant_bound = cartesian[0].size() - 1;
+	int q						= -1; 
+	int quadrant				= particle_quadrant_helper(particle);
+	int quadrant_bound			= cartesian[0].size() - 1;
 
 	//QuadI
 	if (quadrant == 1) {
@@ -252,10 +256,37 @@ void particle_graph_translator(graph<T>& cartesian, const pair<pair<int, int>, T
 
 	int quadrant					= particle_quadrant_helper(coordinates); 
 
-	if (particle_within_bounds(cartesian, coordinates, BOUND_MESSAGE)) {
-		cartesian[quadrant][coordinates.first][coordinates.second] = value;
+	int quadrant_bound				= cartesian[0].size() - 1;
+	int translated_X				= 0;
+	int translated_Y				= 0;
+
+	switch (quadrant) {
+		case 1:
+			translated_X = quadrant_bound - coordinates.second;
+			translated_Y = coordinates.first;
+			break;
+		case 0:
+			translated_X = quadrant_bound - coordinates.second;
+			translated_Y = quadrant_bound - (-1 * coordinates.first); 
+			break;
+		case 2:
+			translated_X = (-1 * coordinates.second);
+			translated_Y = quadrant_bound - (-1 * coordinates.first); 
+			break;
+		case 3:
+			translated_X = coordinates.first;
+			translated_Y = (-1 * coordinates.second);
+			break;
 	}
 
+	if ((particle_within_bounds(cartesian, coordinates, BOUND_MESSAGE)) && quadrant != 3) {
+		cartesian[quadrant][translated_X][translated_Y] = value;
+		return;
+	}
+	else if ((particle_within_bounds(cartesian, coordinates, BOUND_MESSAGE)) && quadrant == 3) {
+		cartesian[quadrant][translated_Y][translated_X] = value;
+		return; 
+	}
 }
 
 template<typename T>
@@ -270,7 +301,6 @@ void graph_print(const graph<T>& cartesian) {
 	graph[2] = Quad III
 	graph[3] = Quad IV
 */
-
 
 	int planar_height	= cartesian[0].size() + cartesian[1].size(); 
 	int planar_width	= cartesian[0].size() + cartesian[2].size();
@@ -301,22 +331,41 @@ void graph_print(const graph<T>& cartesian) {
 
 int main() {
 	
-	graph<char> cartesian = graph_generate(5, '*');
-
-	//graph_print(cartesian); 
+	graph<char> cartesian = graph_generate(25, '*');
 
 	
-	//Create a function to automate points. 
-	particle_int<char> point_1 = { {0,0},'A' };
-	particle_int<char> point_2 = { {1,-1}, 'B' };
-	particle_int<char> point_3 = { {-1,0}, 'C' };
-	particle_int<char> point_4 = { {-1,-1}, 'D' }; 
+			/*Create a function to automate points. 
+				particle_int<char> point_1 = { {0,0},'A' };
+				particle_int<char> point_2 = { {1,-1}, 'B' };
+				particle_int<char> point_3 = { {-1,0}, 'C' };
+				particle_int<char> point_4 = { {-1,-1}, 'D' }; 
 
 
-	particle_graph_translator(cartesian, point_2, true); 
+				particle_graph_translator(cartesian, point_3, true); 
 
-	graph_print(cartesian); 
+				graph_print(cartesian); */
 
+
+	int pointA = 0;
+	int pointB = 180; 
+
+	double magnitude = sqrt(2); 
+
+	while (true) {
+
+		double x_position = magnitude * cos(radians_conversion(pointA));
+		double y_position = magnitude * sin(radians_conversion(pointB)); 
+
+		print_double_coordinates({ x_position,y_position }); 
+
+		pointA %= 360;
+		pointB %= 360;
+
+		pointA++;
+		pointB++; 
+
+		timer_millis(50,false); 
+	}
 
 	return 0;
 }
@@ -341,5 +390,16 @@ int main() {
 	-options for operations on specific quadrants.
 
 	-Allowing for controllable animations, via some mainframe where the user is able to control rates,positions, ect.
+
+
+	New reminders: 2:38, 1/26/2024:
+
+	To comment out multiple lines:
+	
+		ctrl-k, ctrl-c
+
+		to undo.
+
+		ctrl-k, ctrl-u
 
 */
