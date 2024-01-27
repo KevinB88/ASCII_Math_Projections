@@ -213,6 +213,8 @@ bool particle_within_bounds(const graph<T>& cartesian, const pair<int,int>& part
 		
 		x_bound = (particle.first >= 0 && particle.first <= quadrant_bound);
 		y_bound = (particle.second >= -1 * quadrant_bound && particle.second <= 0);
+
+		q = 4; 
 	}
 
 	if (x_bound && y_bound) return true;
@@ -329,7 +331,7 @@ void graph_print(const graph<T>& cartesian) {
 	}
 }
 
-
+//This function will most likely be depracated
 template<typename T>
 void graph_print_version_II(const graph<T>& cartesian) {
 	using namespace std;
@@ -389,13 +391,23 @@ int main() {
 	//* MAIN FRAME
 			int pointA					= 0;
 			int pointB					= 180;
-			double magnitude			= sqrt(2); 
+			double magnitude			= 8.5; 
+			double scalar				= 12.5;
 			char particle_symbol		= '*'; 
 			char native_symbol			= ' '; 
-			int quadrant_bound			= 25; 
+			int quadrant_bound			= 90; 
+
 			bool toggle_timer_message	= false;
 			bool toggle_messages		= true; 
-			int time_scale				= 10; 
+			int time_scale				= 5; 
+
+			bool complete_circle		= false;
+			int pointA_conclude			= 360;
+
+			bool toggle_spiral			= true;
+			double  spiral_index		= 0.00001; 
+
+			
 	//* MAIN FRAME
 
 
@@ -428,8 +440,8 @@ int main() {
 				double x_position = magnitude * cos(radians_conversion(pointA));
 				double y_position = magnitude * sin(radians_conversion(pointA));
 
-				int x_transl = x_position * 10;
-				int y_transl = y_position * 10;
+				int x_transl = x_position * scalar;
+				int y_transl = y_position * scalar;
 
 					pair<int, int> coordiantes = { x_transl, y_transl };
 					pair<pair<int, int>, char> particle = { coordiantes, particle_symbol }; 
@@ -448,16 +460,42 @@ int main() {
 
 		timer_millis(time_scale, toggle_timer_message); 
 
-		if (pointA == 360) break;
+		if (complete_circle) {
+			if (pointA == pointA_conclude) break;
+		}
+
+		if (toggle_spiral) {
+
+			if (toggle_messages) cout << "Magnitude: " << magnitude << "\n"; 
+
+			magnitude -= spiral_index;
+			
+			if (magnitude <= 0) break;
+		}
 	}
 			auto end_time = chrono::high_resolution_clock::now(); 
-
-			auto time_elapsed = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); 
-
+			auto time_elapsed_milliseconds = chrono::duration_cast<chrono::milliseconds>(end_time - start_time); 
+			auto time_elapsed_seconds = chrono::duration_cast<chrono::seconds>(end_time - start_time);
 		
 			if (toggle_messages) {
 
-				std::cout << "Time elapsed: " << time_elapsed.count() << " milliseconds\n";
+				if (time_elapsed_milliseconds.count() < 1000) {
+					std::cout << "Time elapsed: " << time_elapsed_milliseconds.count() << " milliseconds.\n";
+				}
+				else {
+
+					if (time_elapsed_seconds.count() < 360) {
+						std::cout << "Time elapsed: " << time_elapsed_seconds.count() << " seconds.\n";
+					}
+					else if (time_elapsed_seconds.count() >= 360 && time_elapsed_seconds.count() < 3600) {
+						auto time_elapsed_minutes = chrono::duration_cast<chrono::minutes>(time_elapsed_seconds);
+						std::cout << "Time elapsed: " << time_elapsed_minutes.count() << " minutes.\n";
+					}
+					else {
+						auto time_elapsed_hours = chrono::duration_cast<chrono::hours>(time_elapsed_seconds); 
+						std::cout << "Time elapsed: " << time_elapsed_hours.count() << " hours.\n"; 
+					}
+				}
 				timer_seconds(2, false); 
 				std::cout << "Printing shape..\n"; 
 				timer_seconds(1, false);
